@@ -37,5 +37,13 @@ namespace OrderService.Repository
         {
             return (int)await _productCollection.CountDocumentsAsync(p => p.CategoryId == categoryId);
         }
+
+        //UpdateProduct
+        public async Task UpdateProduct(Product product)
+        {
+            await _productCollection.ReplaceOneAsync(p => p.Id == product.Id, product);
+        }
+
+
     }
 }

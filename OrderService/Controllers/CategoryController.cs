@@ -21,11 +21,6 @@ namespace OrderService.Controllers
         [Route("user/getAllCategory")]
         public async Task<IActionResult> GetAllCategory()
         {
-            //        {
-            //            "id": 1,
-            //    "name": "Racket",
-            //    "product_count": "5"
-            //},
             var result = await _categoryRepository.GetAllCategory();
 
             if (result == null)

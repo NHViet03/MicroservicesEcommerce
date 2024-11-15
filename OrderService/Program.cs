@@ -7,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDB"));
 builder.Services.AddSingleton<ProductRepository>();
 builder.Services.AddSingleton<CategoryRepository>();
+builder.Services.AddSingleton<OrderRepository>();
+builder.Services.AddSingleton<OrderDetailRepository>();
 
 
 // Alow CORS

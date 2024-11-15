@@ -17,5 +17,30 @@ namespace OrderService.Repository
             _orderCollection = database.GetCollection<Order>(settings.Value.OrderCollection);
         }
 
+        public async Task<List<Order>> GetAllOrder(string customerId)
+        {
+            return await _orderCollection.Find(o => o.CustomerId == customerId).ToListAsync();
+        }
+        public async Task<Order> GetOrderById(string id)
+        {
+            return await _orderCollection.Find(o => o.Id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<Order> GetOrder(string orderId)
+        {
+            return await _orderCollection.Find(o => o.Id == orderId).FirstOrDefaultAsync();
+        }
+
+        //CreateOrder
+        public async Task<Order> CreateOrder(Order order)
+        {
+
+
+            await _orderCollection.InsertOneAsync(order);
+            // Return Order From OrderDate
+            var result = await _orderCollection.Find(o => o.OrderDate == order.OrderDate).FirstOrDefaultAsync();
+            return result;
+        }
+
     }
 }
