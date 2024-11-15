@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using OrderService.Models;
 
@@ -17,9 +18,19 @@ namespace OrderService.Repository
             _productCollection = database.GetCollection<Product>(settings.Value.ProductCollection);
         }
 
-        public async Task CreateProduct(Product product)
+        public async Task<int> CountProduct()
         {
-            await _productCollection.InsertOneAsync(product);
+            return (int)await _productCollection.CountDocumentsAsync(new BsonDocument());
+        }
+
+        public async Task<List<Product>> GetAllProduct()
+        {
+            return await _productCollection.Find(new BsonDocument()).ToListAsync();
+        }
+
+        public async Task<Product> GetProductById(string id)
+        {
+            return await _productCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
         }
     }
 }
