@@ -1,4 +1,11 @@
+using OrderService.Models;
+using OrderService.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDB"));
+builder.Services.AddSingleton<ProductRepository>();
 
 // Add services to the container.
 
