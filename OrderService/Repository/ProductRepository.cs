@@ -32,5 +32,10 @@ namespace OrderService.Repository
         {
             return await _productCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
         }
+
+        public async Task<int> CountProductByCategory(string categoryId)
+        {
+            return (int)await _productCollection.CountDocumentsAsync(p => p.CategoryId == categoryId);
+        }
     }
 }

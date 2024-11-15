@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using OrderService.Models;
 
@@ -22,6 +23,11 @@ namespace OrderService.Repository
             var category = await _categoryCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
 
             return category.Name ?? "";
+        }
+
+        public async Task<List<Category>> GetAllCategory()
+        {
+            return await _categoryCollection.Find(new BsonDocument()).ToListAsync();
         }
     }
 }
