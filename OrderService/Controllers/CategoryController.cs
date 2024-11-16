@@ -21,27 +21,34 @@ namespace OrderService.Controllers
         [Route("user/getAllCategory")]
         public async Task<IActionResult> GetAllCategory()
         {
-            var result = await _categoryRepository.GetAllCategory();
-
-            if (result == null)
+            try
             {
-                return NotFound();
-            }
+                var result = await _categoryRepository.GetAllCategory();
 
-
-            var finalResult = new List<dynamic>();
-            foreach (var item in result)
-            {
-                var productCount = await _productRepository.CountProductByCategory(item.Id);
-                var dynamicObj = new
+                if (result == null)
                 {
-                    id = item.Id,
-                    name = item.Name,
-                    product_count = productCount
-                };
-                finalResult.Add(dynamicObj);
+                    return NotFound();
+                }
+
+
+                var finalResult = new List<dynamic>();
+                foreach (var item in result)
+                {
+                    var productCount = await _productRepository.CountProductByCategory(item.Id);
+                    var dynamicObj = new
+                    {
+                        id = item.Id,
+                        name = item.Name,
+                        product_count = productCount
+                    };
+                    finalResult.Add(dynamicObj);
+                }
+                return Ok(finalResult);
             }
-            return Ok(finalResult);
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
     }
 }

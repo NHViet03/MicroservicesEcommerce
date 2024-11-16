@@ -1,5 +1,6 @@
 ﻿using OrderService.Models;
 using OrderService.Repository;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +10,12 @@ builder.Services.AddSingleton<ProductRepository>();
 builder.Services.AddSingleton<CategoryRepository>();
 builder.Services.AddSingleton<OrderRepository>();
 builder.Services.AddSingleton<OrderDetailRepository>();
+builder.Services.AddSingleton<RedisCache>();
 
+// Redis Cache
+builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
+    ConnectionMultiplexer.Connect(builder.Configuration.GetSection("Redis:RedisUrl").Value!.ToString()
+));
 
 // Alow CORS
 builder.Services.AddCors(options =>
