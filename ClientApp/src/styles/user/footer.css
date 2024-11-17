@@ -1,0 +1,135 @@
+.footer {
+  background-color: var(--bg-primary-color);
+  padding: 64px 48px 64px;
+  color: var(--white-color);
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  text-align: left;
+  gap: 12px;
+}
+
+.footer-section {
+  flex-basis: calc(25% - 12px);
+  flex-grow: 1;
+}
+
+.footer-section h3 {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  font-family: var(--title--font);
+}
+
+.footer-section p,
+.footer-section a {
+  font-size: 16px;
+  text-decoration: none;
+  line-height: 1.6;
+  font-family: var(--content-font);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  display: block;
+}
+
+.footer-section p {
+  margin: 5px 0;
+}
+
+.footer-section a:hover {
+  color: var(--primary-color);
+}
+
+.social-icons {
+  display: flex;
+  gap: 12px;
+}
+
+.social-icons a {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  background-color: #383b43;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white-color);
+  font-size: 16px;
+  transition: all 0.3s ease-out 0s;
+}
+
+.social-icons a:hover {
+  background-color: var(--primary-color);
+  color: var(--black-color);
+}
+
+.social-icons a i {
+  transition: all 0.3s ease-out 0s;
+}
+
+.social-icons a:hover i {
+  transform: translateY(-2px);
+}
+
+.subscribe-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.subscribe-section p {
+  text-transform: unset;
+}
+
+@media screen and (min-width: 769px) and (max-width: 1199.98px) {
+  .footer-section {
+    margin-bottom: 12px;
+  }
+  .footer-section h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .footer-section p,
+  .footer-section a {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .footer {
+    gap: 16px;
+    padding: 64px 36px;
+  }
+  .footer-section {
+    flex-basis: calc(50% - 16px);
+    margin-bottom: 16px;
+  }
+
+  .footer-section h3 {
+    font-size: 17px;
+    margin-bottom: 12px;
+  }
+
+  .footer-section p,
+  .footer-section a {
+    margin-bottom: 8px;
+  }
+}
+
+@media screen and (max-width: 412px) {
+  .footer {
+    padding: 36px 24px;
+  }
+  .footer-section {
+    flex-basis: 100%;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .social-icons {
+   justify-content: center;
+  }
+}

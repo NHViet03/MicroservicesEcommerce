@@ -1,0 +1,233 @@
+.user_contact {
+  background-color: #f7f8f9;
+  padding: 0 80px;
+  margin-bottom: 128px;
+}
+
+.user_contact_banner {
+  width: 100%;
+  max-width: 960px;
+  padding: 160px 0;
+  margin: auto;
+}
+
+.user_contact_banner h1 {
+  color: #222222;
+  font-size: 80px;
+  font-weight: 100;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  font-family: var(--title-font);
+  text-align: center;
+  letter-spacing: 3px;
+}
+
+.user_contact_banner p {
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 26px;
+  color: #666;
+  margin-bottom: 0;
+  text-align: center;
+  padding: 0 64px;
+  font-weight: 400;
+}
+
+/* Contact Form */
+.user_contact_form {
+  background-color: var(--white-color);
+  border-radius: 4px;
+  box-shadow: 0px 30px 30px -15px rgba(0, 0, 0, 0.15);
+  padding: 60px 80px 60px 80px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.user_contact_form_section {
+  flex-basis: calc(50% - 24px);
+}
+
+.user_contact_form_section p {
+  margin-bottom: 12px;
+  font-family: var(--title-font);
+  color: #7a7a7a;
+  text-transform: capitalize;
+  letter-spacing: 1px;
+}
+
+.user_contact_form_section h2 {
+  font-size: 32px;
+  color: var(--text-color);
+  font-family: var(--content-font);
+  font-weight: 200;
+  letter-spacing: 1px;
+  margin-bottom: 24px;
+}
+
+.user_contact_form_section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user_contact_form_section label {
+  font-family: var(--title-font);
+  font-size: 18px;
+  font-style: normal;
+  color: var(--text-color);
+  letter-spacing: 1.5px;
+}
+
+.user_contact_form_section label span {
+  color: #f00;
+}
+
+.user_contact_form_section .double_input {
+  display: flex;
+  gap: 12px;
+}
+
+.user_contact_form_section .double_input > div {
+  flex-basis: 50%;
+}
+
+.user_contact_form_section input,
+.user_contact_form_section textarea {
+  font-family: var(--text-font);
+  font-size: 16px;
+  font-style: normal;
+  color: var(--text-color);
+  border-radius: 0 !important;
+  border-color: var(--border-color);
+  height: 50px;
+}
+
+.user_contact_form_section textarea {
+  resize: none;
+  min-height: 120px;
+}
+
+.user_contact_form_section .double_input {
+  display: flex;
+  gap: 12px;
+}
+
+.user_contact_form_section .double_input > div {
+  flex-basis: 50%;
+}
+
+.user_contact_form_section button {
+  border-radius: 0;
+  background-color: var(--primary-color);
+  width: 100%;
+  font-family: var(--title-font);
+  font-size: 24px;
+  color: var(--white-color);
+  letter-spacing: 2px;
+}
+
+.user_contact_form_section button:hover {
+  background-color: var(--bg-primary-color-light);
+  color: var(--primary-color);
+}
+
+@media screen and (min-width: 769px) and (max-width: 1199.98px) {
+  .user_contact {
+    padding: 0 64px;
+    margin-bottom: 100px;
+  }
+
+  .user_contact_banner {
+    padding: 100px 0;
+  }
+
+  .user_contact_banner p {
+    line-height: 24px;
+    padding: 0 56px;
+  }
+
+  .user_contact_form {
+    padding: 48px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .user_contact {
+    padding: 0 48px;
+    margin-bottom: 64px;
+  }
+
+  .user_contact_banner {
+    padding: 64px 0;
+  }
+
+  .user_contact_banner h1 {
+    font-size: 64px;
+  }
+
+  .user_contact_banner p {
+    padding: 0 32px;
+  }
+
+  .user_contact_form {
+    flex-wrap: wrap;
+    flex-direction: column-reverse;
+    align-items: unset;
+    gap: 36px;
+    padding: 48px;
+  }
+
+  .user_contact_form_section {
+    flex-basis: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .user_contact {
+    padding: 0 24px;
+  }
+
+  .user_contact_banner {
+    padding: 48px 0;
+  }
+
+  .user_contact_banner h1 {
+    font-size: 56px;
+  }
+
+  .user_contact_banner p {
+    padding: 0px;
+    line-height: 24px;
+  }
+
+  .user_contact_form {
+    padding: 16px;
+  }
+
+  .user_contact_form_section h2 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .user_contact_form_section label {
+    font-size: 16px;
+    font-style: normal;
+    letter-spacing: 1px;
+  }
+
+  .user_contact_form_section label span {
+    color: #f00;
+  }
+
+  .user_contact_form_section input,
+  .user_contact_form_section textarea {
+    font-size: 15px;
+    height: 48px;
+  }
+  .user_contact_form_section button {
+    font-size: 20px;  
+    letter-spacing: 1px;
+  }
+}
