@@ -1,6 +1,5 @@
 DROP TABLE IF EXISTS public."users" CASCADE;
 DROP TABLE IF EXISTS public."email_verifications";
-DROP TABLE IF EXISTS public."password_resets";
 DROP TABLE IF EXISTS public."customers";
 
 -- users table
@@ -25,7 +24,7 @@ CREATE TABLE email_verifications (
 
 -- customer table
 CREATE TABLE customers (
-    customerId SERIAL PRIMARY KEY,
+    customerId UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     userId UUID REFERENCES users(userId) ON DELETE CASCADE,
     firstName VARCHAR(255),
     lastName VARCHAR(255),

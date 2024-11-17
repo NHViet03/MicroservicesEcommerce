@@ -29,7 +29,7 @@ namespace OrderService.Controllers
                 if (cartExist != null)
                 {
                     cartExist.Quantity += 1;
-                    await redisCache.SetCacheData(cacheKey, cartExist, DateTimeOffset.Now.AddMinutes(2.0));
+                    await redisCache.SetCacheData(cacheKey, cartExist, DateTimeOffset.Now.AddDays(1.0));
                 }
                 else
                 {
@@ -39,7 +39,7 @@ namespace OrderService.Controllers
                         ProductId = addToCartDTO.ProductId,
                         Quantity = 1
                     };
-                    await redisCache.SetCacheData(cacheKey, cart, DateTimeOffset.Now.AddMinutes(2.0));
+                    await redisCache.SetCacheData(cacheKey, cart, DateTimeOffset.Now.AddDays(1.0));
                 }
 
                 return Ok(new { message = "Product added to cart" });
@@ -108,13 +108,47 @@ namespace OrderService.Controllers
                         {
                             CartId = cart.Id,
                             ProductId = cart.ProductId,
-                            ProductName = product.Name,
-                            ProductImage = product.Image,
-                            Price = product.Price,
-                            SalePrice = product.SalePrice,
+                            ProductName = product?.Name,
+                            ProductImage = product?.Image,
+                            Price = product?.Price,
+                            SalePrice = product?.SalePrice,
                             Quantity = cart.Quantity,
-                            Total = product.SalePrice * cart.Quantity,
+                            Total = product?.SalePrice * cart.Quantity,
                             Status = ""
+                        };
+                        getAllCart.Add(cartDTO);
+
+                    }
+                }
+                return Ok(getAllCart);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet]
+        [Route("user/getAllCartAuth/{customerId}")]
+        public async Task<IActionResult> GetAllCartAuth(string customerId)
+        {
+            var getAllCart = new List<GetAllCartAuthDTO>();
+            try
+            {
+                // Get all keys from Redis like "customerId-*"
+                var cacheKeyPattern = $"{customerId}-*";
+                var cacheKeys = await redisCache.GetKeysByPattern(cacheKeyPattern);
+                foreach (var cacheKey in cacheKeys)
+                {
+                    var cart = await redisCache.GetCacheData<Cart>(cacheKey);
+                    if (cart != null)
+                    {
+                        var product = await productRepository.GetProductById(cart.ProductId);
+                        var cartDTO = new GetAllCartAuthDTO
+                        {
+                            CartId = cart.Id,
+                            ProductId = cart.ProductId, 
+                            Quantity = cart.Quantity,
                         };
                         getAllCart.Add(cartDTO);
 

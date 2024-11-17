@@ -126,6 +126,7 @@ namespace OrderService.Controllers
                     CustomerId = orderDTO.customerId,
                     OrderDate = DateTime.Now,
                     Address = orderDTO.address,
+                    PhoneNumber = orderDTO.phoneNumber,
                     OrderStatus = 0,
                     Total = orderDTO.orderDetails.Sum(o => o.Total)
                 };

@@ -11,8 +11,10 @@ app.use(cookieParser());
 const port = 3000;
 
 import authRouter from "./routers/authRouter.js";
+import customerRouter from "./routers/customerRouter.js";
 
 app.use("/api", authRouter);
+app.use("/api", customerRouter);
 
 // All Routes
 app.get("/", (req, res) => {

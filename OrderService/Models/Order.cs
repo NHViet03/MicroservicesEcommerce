@@ -13,6 +13,8 @@ namespace OrderService.Models
 
         public string? Address { get; set; }
 
+        public string? PhoneNumber { get; set; }
+
         public int? OrderStatus { get; set; }
 
         public decimal? Total { get; set; }

@@ -14,7 +14,7 @@ builder.Services.AddSingleton<RedisCache>();
 
 // Redis Cache
 builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
-    ConnectionMultiplexer.Connect(builder.Configuration.GetSection("Redis:RedisUrl").Value!.ToString()
+    ConnectionMultiplexer.Connect(builder.Configuration.GetSection("Redis:ConnectionString").Value!.ToString()
 ));
 
 // Alow CORS
