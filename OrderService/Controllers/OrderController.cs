@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Messaging.ServiceBus;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using OrderService.DTO;
 using OrderService.Models;
@@ -16,13 +17,15 @@ namespace OrderService.Controllers
         private readonly OrderDetailRepository _orderDetailRepository;
         private readonly ProductRepository _productRepository;
         private readonly RedisCache _redisCache;
+        private readonly IConfiguration _configuration;
 
-        public OrderController(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, ProductRepository productRepository, RedisCache redisCache)
+        public OrderController(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, ProductRepository productRepository, RedisCache redisCache, IConfiguration configuration)
         {
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
             _productRepository = productRepository;
             _redisCache = redisCache;
+            _configuration = configuration;
         }
         private async Task<UserFromTokenDTO?> ValidateToken()
         {
@@ -151,6 +154,8 @@ namespace OrderService.Controllers
 
             try
             {
+                var customerDataToken = await ValidateToken();
+
 
                 // Check quantity of products
                 foreach (var item in orderDTO.orderDetails)
@@ -205,7 +210,6 @@ namespace OrderService.Controllers
 
                 // Start ==> Update Customer Address and Phone Number
                 // API From Account
-                var customerDataToken = await ValidateToken();
                 var customer = new UpdateDeliveryInfoDTO
                 {
                     customerId = customerDataToken.data.CustomerId,
@@ -222,6 +226,23 @@ namespace OrderService.Controllers
                 HttpResponseMessage response = await client.PutAsync(url, data);
 
                 //End  Start ==> Update Customer Address and Phone Number
+
+                // Start => Call Azure Bus Service Order
+                var connectionStringAzureBus = _configuration["AzureServiceBus:ConnectionString"];
+                var clientAzureBus = new ServiceBusClient(connectionStringAzureBus);
+                var sender = clientAzureBus.CreateSender("orderqueue");
+                var body = new OrderSendMailDTO
+                {
+                    OrderId = orderResult.Id,
+                    Email = customerDataToken.data.Email,
+                    FullName = customerDataToken.data.FirstName + " " + customerDataToken.data.LastName,
+                    TotalPrice = orderResult.Total
+                };
+                // JsonSerializer.Serialize
+                var serializedMailBody = System.Text.Json.JsonSerializer.Serialize(body);
+                var message = new ServiceBusMessage(serializedMailBody);
+                await sender.SendMessageAsync(message);
+                // End => Call Azure Bus Service Order
 
                 return Ok(new { message = "Order created successfully", orderId = orderResult.Id });
             }
