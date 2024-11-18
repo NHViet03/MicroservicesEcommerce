@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using OrderService.DTO;
 using OrderService.Models;
 using OrderService.Repository;
+using System.Net;
 
 namespace OrderService.Controllers
 {
@@ -12,11 +14,35 @@ namespace OrderService.Controllers
         private readonly RedisCache redisCache;
         private readonly ProductRepository productRepository;
 
+
         public CartController(RedisCache redisCache, ProductRepository productRepository)
         {
             this.redisCache = redisCache;
             this.productRepository = productRepository;
         }
+
+        private async Task<UserFromTokenDTO?> ValidateToken()
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedAccessException("Authorization header is missing");
+            }
+
+            using HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", token);
+            string url = "http://localhost:3000/api/validate";
+            HttpResponseMessage response = await client.PostAsync(url, null);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new UnauthorizedAccessException("Invalid token");
+            }
+
+            var responseData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<UserFromTokenDTO>(responseData);
+        }
+
 
         [HttpPost]
         [Route("user/addToCart")]
@@ -24,6 +50,7 @@ namespace OrderService.Controllers
         {
             try
             {
+                var customerDataToken = await ValidateToken();
                 var cacheKey = $"{addToCartDTO.CustomerId}-{addToCartDTO.ProductId}";
                 var cartExist = await redisCache.GetCacheData<Cart>(cacheKey);
                 if (cartExist != null)
@@ -59,6 +86,7 @@ namespace OrderService.Controllers
         {
             try
             {
+                var customerDataToken = await ValidateToken();
                 foreach (var cart in carts)
                 {
                     var cacheKeyPattern = $"*-*";
@@ -95,9 +123,11 @@ namespace OrderService.Controllers
         [Route("user/getAllCart/{customerId}")]
         public async Task<IActionResult> GetAllCart(string customerId)
         {
+
             var getAllCart = new List<GetAllCartDTO>();
             try
             {
+                var customerDataToken = await ValidateToken();
                 // Get all keys from Redis like "customerId-*"
                 var cacheKeyPattern = $"{customerId}-*";
                 var cacheKeys = await redisCache.GetKeysByPattern(cacheKeyPattern);
@@ -138,6 +168,7 @@ namespace OrderService.Controllers
             var getAllCart = new List<GetAllCartAuthDTO>();
             try
             {
+                var customerDataToken = await ValidateToken();
                 // Get all keys from Redis like "customerId-*"
                 var cacheKeyPattern = $"{customerId}-*";
                 var cacheKeys = await redisCache.GetKeysByPattern(cacheKeyPattern);

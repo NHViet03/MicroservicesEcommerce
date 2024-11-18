@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using OrderService.DTO;
 using OrderService.Models;
 using OrderService.Repository;
+using System.Net;
+using System.Text;
 
 namespace OrderService.Controllers
 {
@@ -21,6 +24,27 @@ namespace OrderService.Controllers
             _productRepository = productRepository;
             _redisCache = redisCache;
         }
+        private async Task<UserFromTokenDTO?> ValidateToken()
+        {
+            var token = Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedAccessException("Authorization header is missing");
+            }
+
+            using HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", token);
+            string url = "http://localhost:3000/api/validate";
+            HttpResponseMessage response = await client.PostAsync(url, null);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new UnauthorizedAccessException("Invalid token");
+            }
+
+            var responseData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<UserFromTokenDTO>(responseData);
+        }
 
         //User API
         [HttpGet]
@@ -29,9 +53,10 @@ namespace OrderService.Controllers
         {
             try
             {
+                var customerDataToken = await ValidateToken();
+
                 // API From Account
-                var fakeCustomerId = "645b8a3d9f2a8c0001d7e2a1";
-                var result = await _orderRepository.GetAllOrder(fakeCustomerId);
+                var result = await _orderRepository.GetAllOrder(customerDataToken.data.CustomerId);
 
                 if (result == null)
                 {
@@ -69,6 +94,7 @@ namespace OrderService.Controllers
         {
             try
             {
+                var customerDataToken = await ValidateToken();
                 var result = await _orderRepository.GetOrderById(orderId);
 
                 if (result == null)
@@ -78,7 +104,7 @@ namespace OrderService.Controllers
 
                 var orderDetails = await _orderDetailRepository.GetOrderDetailByOrderID(orderId);
 
-                // Get Customer Name and Phone Number from Account Service
+
 
                 var finalResult = new List<dynamic>();
                 foreach (var item in orderDetails)
@@ -95,7 +121,21 @@ namespace OrderService.Controllers
                     finalResult.Add(dynamicObj);
                 }
 
-                return Ok(new { message = "Order fetched successfully", order = new { OrderId = result.Id, Address = result.Address, OrderDate = result.OrderDate, OrderStatus = result.OrderStatus, Total = result.Total, Name = "Jane Smith", PhoneNumber = "987-654-3210", OrderDetails = finalResult } });
+                return Ok(new
+                {
+                    message = "Order fetched successfully",
+                    order = new
+                    {
+                        OrderId = result.Id,
+                        Address = result.Address,
+                        OrderDate = result.OrderDate,
+                        OrderStatus = result.OrderStatus,
+                        Total = result.Total,
+                        Name = customerDataToken.data.FirstName + " " + customerDataToken.data.LastName,
+                        PhoneNumber = customerDataToken.data.PhoneNumber,
+                        OrderDetails = finalResult
+                    }
+                });
             }
             catch (Exception e)
             {
@@ -111,6 +151,7 @@ namespace OrderService.Controllers
 
             try
             {
+
                 // Check quantity of products
                 foreach (var item in orderDTO.orderDetails)
                 {
@@ -162,10 +203,25 @@ namespace OrderService.Controllers
                     await _redisCache.RemoveData(key);
                 }
 
-                // Update Customer Address and Phone Number
+                // Start ==> Update Customer Address and Phone Number
                 // API From Account
+                var customerDataToken = await ValidateToken();
+                var customer = new UpdateDeliveryInfoDTO
+                {
+                    customerId = customerDataToken.data.CustomerId,
+                    address = orderDTO.address,
+                    phoneNumber = orderDTO.phoneNumber
+                };
 
+                // Put API to localhost:3000/api/updateDeliveryInfo with body  UpdateDeliveryInfoDTO
+                using HttpClient client = new HttpClient();
+                client.DefaultRequestHeaders.Add("Authorization", Request.Headers["Authorization"].ToString());
+                string url = "http://localhost:3000/api/updateDeliveryInfo";
+                var json = JsonConvert.SerializeObject(customer);
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await client.PutAsync(url, data);
 
+                //End  Start ==> Update Customer Address and Phone Number
 
                 return Ok(new { message = "Order created successfully", orderId = orderResult.Id });
             }
