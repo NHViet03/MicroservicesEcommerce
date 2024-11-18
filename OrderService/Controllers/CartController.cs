@@ -61,22 +61,25 @@ namespace OrderService.Controllers
             {
                 foreach (var cart in carts)
                 {
-                    if (cart.Status == "DELETE")
+                    var cacheKeyPattern = $"*-*";
+                    var cacheKeys = await redisCache.GetKeysByPattern(cacheKeyPattern);
+                    foreach (var cacheKey in cacheKeys)
                     {
-                        //var cacheKey = $"{cart.CartId}";
-                        var cacheKey = await redisCache.GetCacheKeyFromCartId(cart.CartId);
+                        var cartExits = await redisCache.GetCacheData<Cart>(cacheKey);
 
-                        await redisCache.RemoveData(cacheKey);
-                    }
-                    else if (cart.Status == "UPDATE")
-                    {
-                        var cacheKey = await redisCache.GetCacheKeyFromCartId(cart.CartId);
-                        var cartExist = await redisCache.GetCacheData<Cart>(cacheKey);
-                        if (cartExist != null)
+                        if (cartExits.Id == cart.CartId)
                         {
-                            cartExist.Quantity = cart.Quantity;
-                            await redisCache.SetCacheData(cacheKey, cartExist, DateTimeOffset.UtcNow.AddMinutes(5));
+                            if (cart.Status == "UPDATE")
+                            {
+                                cartExits.Quantity = cart.Quantity;
+                                await redisCache.SetCacheData(cacheKey, cartExits, DateTimeOffset.Now.AddDays(1.0));
+                            }
+                            else if (cart.Status == "DELETE")
+                            {
+                                await redisCache.RemoveData(cacheKey);
+                            }
                         }
+
                     }
                 }
 
@@ -147,7 +150,7 @@ namespace OrderService.Controllers
                         var cartDTO = new GetAllCartAuthDTO
                         {
                             CartId = cart.Id,
-                            ProductId = cart.ProductId, 
+                            ProductId = cart.ProductId,
                             Quantity = cart.Quantity,
                         };
                         getAllCart.Add(cartDTO);
