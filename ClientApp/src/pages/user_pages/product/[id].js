@@ -110,10 +110,16 @@ const ProductDetail = () => {
 
     try {
       setLoading(true);
-      const res = await postDataAPI("customer/user/addToCart", {
-        CustomerId: auth.CustomerId,
-        ProductId: id,
-      });
+      if (auth.token) {
+        const res = await postDataAPI(
+          "customer/user/addToCart",
+          {
+            CustomerId: auth.CustomerId,
+            ProductId: id,
+          },
+          auth.token
+        );
+      }
 
       const processCart = (cart) => {
         let isExist = false;

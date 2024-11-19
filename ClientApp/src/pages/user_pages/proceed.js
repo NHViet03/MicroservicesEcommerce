@@ -23,7 +23,7 @@ const Proceed = () => {
       return;
     }
 
-    getDataAPI(`customer/user/getAllCart/${auth.CustomerId}`)
+    getDataAPI(`customer/user/getAllCart/${auth.CustomerId}`, auth.token)
       .then((res) => {
         setOrderData((pre) => ({
           ...pre,

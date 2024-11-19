@@ -15,7 +15,7 @@ const Cart = () => {
       return;
     }
 
-    getDataAPI(`customer/user/getAllCart/${auth.CustomerId}`)
+    getDataAPI(`customer/user/getAllCart/${auth.CustomerId}`, auth.token)
       .then((res) => {
         setCarts(res.data);
         setTotal(res.data.reduce((acc, cart) => acc + cart.Total, 0));
@@ -65,7 +65,7 @@ const Cart = () => {
       Status: cart.Status,
     }));
 
-    await postDataAPI("customer/user/updateAllCart", { cart: postData });
+    await postDataAPI("customer/user/updateAllCart", postData, auth.token);
   };
 
   return (
