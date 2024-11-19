@@ -97,7 +97,11 @@ const Proceed = () => {
     };
 
     try {
-      const res = await postDataAPI("order/user/createOrder", postData);
+      const res = await postDataAPI(
+        "order/user/createOrder",
+        postData,
+        auth.token
+      );
       setOrderData({
         ...orderData,
         orderSuccess: true,
