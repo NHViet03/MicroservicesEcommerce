@@ -1,11 +1,14 @@
 import React, { useState, useContext } from "react";
 import { AppContext } from "../../App";
-import { getDataAPI, postDataAPI } from "../../utils/fetchDataAccount";
+import { postDataAPI } from "../../utils/fetchDataAccount";
+import Loading from "../Loading";
+import VerifyImg from "../../images/verify.png";
 
 function AuthenticationModal({ showAuthModal, setShowAuthModal }) {
   const { setAlert, auth, setAuth } = useContext(AppContext);
 
   const [activeTab, setActiveTab] = useState("login");
+  const [loading, setLoading] = useState(false);
 
   const [loginData, setLoginData] = useState({
     Email: "",
@@ -20,6 +23,11 @@ function AuthenticationModal({ showAuthModal, setShowAuthModal }) {
     ConfirmPassword: "",
   });
 
+  const [verifyData, setVerifyData] = useState({
+    email: "",
+    verificationToken: "",
+  });
+
   const [typePass, setTypePass] = useState(false);
 
   const handleChangeInput = (e) => {
@@ -29,7 +37,7 @@ function AuthenticationModal({ showAuthModal, setShowAuthModal }) {
         ...loginData,
         [name]: value,
       });
-    } else {
+    } else if (activeTab === "register") {
       setRegisterData({
         ...registerData,
         [name]: value,
@@ -40,12 +48,20 @@ function AuthenticationModal({ showAuthModal, setShowAuthModal }) {
   const handleClick = (e) => {
     if (e.target.classList.contains("modal")) {
       setShowAuthModal(!showAuthModal);
+      setActiveTab("login");
+
+      setVerifyData({
+        email: "",
+        verificationToken: "",
+      });
     }
   };
 
   // Call Register API
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
 
     if (registerData.password !== registerData.confirmPassword) {
       return setAlert({
@@ -55,12 +71,62 @@ function AuthenticationModal({ showAuthModal, setShowAuthModal }) {
       });
     }
 
+    setLoading(true);
+
     try {
-      const res = await postDataAPI("auth/user/register", registerData);
+      const res = await postDataAPI("api/register", {
+        email: registerData.Email,
+        password: registerData.Password,
+        firstName: registerData.FirstName,
+        lastName: registerData.LastName,
+      });
+
+      setLoading(false);
+
+      setVerifyData({
+        email: registerData.Email,
+        verificationToken: "",
+      });
+
+      setActiveTab("verify");
 
       setAlert({
         title: "Register Success",
-        data: res.data.message,
+        data: res.data.msg,
+        type: "success",
+      });
+    } catch (error) {
+      console.log(error);
+      setAlert({
+        title: "Register Error",
+        data: error.response.data.msg,
+        type: "error",
+      });
+      setLoading(false);
+
+      setVerifyData({
+        email: "",
+        verificationToken: "",
+      });
+    }
+  };
+
+  // Call Verify API
+  const handleVerify = async (e) => {
+    e.preventDefault();
+
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      const res = await postDataAPI("api/verify_email", verifyData);
+
+      setLoading(false);
+
+      setAlert({
+        title: "Verify Success",
+        data: res.data.msg,
         type: "success",
       });
 
@@ -72,16 +138,59 @@ function AuthenticationModal({ showAuthModal, setShowAuthModal }) {
         ConfirmPassword: "",
       });
 
+      setVerifyData({
+        email: "",
+        verificationToken: "",
+      });
+
       setShowAuthModal(false);
-      setAuth(res.data.data);
 
-      localStorage.setItem("UserId", res.data.data.UserId);
+      setActiveTab("login");
 
-      
+      setAuth({
+        ...res.data.data,
+        token: res.data.access_token,
+      });
+
+      localStorage.setItem("firstLogin", true);
     } catch (error) {
+      console.log(error);
+      setLoading(false);
+
       setAlert({
-        title: "Register Error",
-        data: error.response.data.message,
+        title: "Verify Error",
+        data: error.response.data.msg,
+        type: "error",
+      });
+
+      localStorage.removeItem("firstLogin");
+    }
+  };
+
+  const handleResendEmail = async (email) => {
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      const res = await postDataAPI("api/resend_email", {
+        email,
+      });
+
+      setLoading(false);
+
+      setAlert({
+        title: "Resend Email Success",
+        data: res.data.msg,
+        type: "success",
+      });
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+
+      setAlert({
+        title: "Resend Email Error",
+        data: error.response.data.msg,
         type: "error",
       });
     }
@@ -91,14 +200,21 @@ function AuthenticationModal({ showAuthModal, setShowAuthModal }) {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    try {
-      const res = await postDataAPI("auth/user/login", loginData);
+    if (loading) return;
 
-      console.log(res);
+    setLoading(true);
+
+    try {
+      const res = await postDataAPI("api/login", {
+        email: loginData.Email,
+        password: loginData.Password,
+      });
+
+      setLoading(false);
 
       setAlert({
         title: "Login Success",
-        data: res.data.message,
+        data: res.data.msg,
         type: "success",
       });
 
@@ -108,20 +224,40 @@ function AuthenticationModal({ showAuthModal, setShowAuthModal }) {
       });
 
       setShowAuthModal(false);
-      setAuth(res.data.data);
+      setAuth({
+        ...res.data.data,
+        token: res.data.access_token,
+      });
 
-      localStorage.setItem("UserId", res.data.data.UserId);
+      localStorage.setItem("firstLogin", true);
     } catch (error) {
+      setLoading(false);
+
       setAlert({
         title: "Login Error",
-        data: error.response.data.message,
+        data: error.response.data.msg,
         type: "error",
       });
+
+      if (error.response.data.isVerified === false) {
+        setVerifyData({
+          email: loginData.Email,
+          verificationToken: "",
+        });
+
+        await handleResendEmail(loginData.Email);
+
+        setActiveTab("verify");
+      } else {
+        localStorage.removeItem("firstLogin");
+      }
     }
-  }
+  };
 
   return (
     <>
+      {loading && <Loading />}
+
       {showAuthModal && (
         <div className="modal" onClick={handleClick}>
           <div className={`modal_container ${activeTab}`}>
@@ -313,12 +449,94 @@ function AuthenticationModal({ showAuthModal, setShowAuthModal }) {
                   </div>
                 </form>
               )}
+
+              {activeTab === "verify" && (
+                <form action="" onSubmit={handleVerify}>
+                  <div className="mb-2 d-flex align-items-center justify-content-center flex-column">
+                    <img
+                      src={VerifyImg}
+                      alt="logo"
+                      className="logo"
+                      style={{
+                        width: "150px",
+                        height: "120px",
+                        objectFit: "contain",
+                      }}
+                    />
+                    <h3
+                      style={{
+                        fontFamily: "var(--title-font)",
+                        letterSpacing: "2px",
+                      }}
+                    >
+                      Please check your email
+                    </h3>
+                    <p
+                      style={{
+                        fontFamily: "var(--content-font)",
+                      }}
+                    >
+                      We've send a code to <strong>{verifyData.email}</strong>
+                    </p>
+                  </div>
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      name="verificationToken"
+                      className="form-control"
+                      placeholder="Enter your code"
+                      required
+                      onChange={(e) =>
+                        setVerifyData({
+                          ...verifyData,
+                          verificationToken: e.target.value,
+                        })
+                      }
+                      value={verifyData.verificationToken}
+                    />
+                  </div>
+
+                  <div>
+                    <button type="submit" className="btn mb-3">
+                      VERIFY
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      fontFamily: "var(--content-font)",
+                      textAlign: "center",
+                    }}
+                  >
+                    <p>
+                      Didn't receive an email code ?{" "}
+                      <strong
+                        style={{
+                          cursor: "pointer",
+                          color: "var(--primary-color)",
+                          textDecoration: "underline",
+                        }}
+                        onClick={() => handleResendEmail(verifyData.email)}
+                      >
+                        Resend
+                      </strong>
+                    </p>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
 
           <div
             className="modal_close"
-            onClick={() => setShowAuthModal(!showAuthModal)}
+            onClick={() => {
+              setShowAuthModal(!showAuthModal);
+              setActiveTab("login");
+              setVerifyData({
+                email: "",
+                verificationToken: "",
+              });
+            }}
           >
             <i class="fa-solid fa-xmark"></i>
           </div>

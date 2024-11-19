@@ -116,6 +116,7 @@ const ProductDetail = () => {
 
       const processCart = (cart) => {
         let isExist = false;
+
         cart.forEach((item) => {
           if (item.ProductId === newProduct.ProductId) {
             isExist = true;

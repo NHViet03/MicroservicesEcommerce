@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { postDataAPI } from "../../utils/fetchDataAccount";
 
 import { AppContext } from "../../App";
 import Logo from "../../images/logo.png";
@@ -44,15 +45,27 @@ function Header({ showAuthModal, setShowAuthModal }) {
     }
   };
 
-  const handleLogout = () => {
-    setAuth(false);
-    localStorage.removeItem("auth");
-    navigate("/");
-    setAlert({
-      title: "Logout Success",
-      data: "You have been logged out",
-      type: "success",
-    });
+  const handleLogout = async () => {
+    try {
+      const response = await postDataAPI("api/logout");
+
+      setAuth(false);
+      navigate("/");
+      setAlert({
+        title: "Logout Success",
+        data: response.data.msg,
+        type: "success",
+      });
+
+      localStorage.removeItem("firstLogin");
+    } catch (err) {
+      console.log(err);
+      setAlert({
+        title: "Error",
+        data: err.response.data.msg,
+        type: "error",
+      });
+    }
   };
 
   return (
@@ -83,7 +96,7 @@ function Header({ showAuthModal, setShowAuthModal }) {
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              <span>Hello {auth.LastName || auth.Email.slice(0, 5)}</span>
+              <span>Hello {auth.FirstName || auth.Email?.slice(0, 5)}</span>
               <i className="fa-solid fa-circle-user" />
             </div>
             <ul

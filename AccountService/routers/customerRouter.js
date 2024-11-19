@@ -5,5 +5,4 @@ const router = Router();
 
 router.put("/updateDeliveryInfo", customerCtrl.updateCustomer);
 
-
 export default router;

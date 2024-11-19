@@ -89,6 +89,11 @@
   left: 50%;
 }
 
+.modal_tabs_separator.verify span{
+  left: 0;
+  width: 100%;
+}
+
 .modal_body {
   padding: 36px 48px 24px 48px;
   background-color: #f7f7f7;

@@ -2,6 +2,8 @@ import pool from "../postgresdb/connect.js";
 import * as bcrypt from "bcrypt";
 import jwt, { decode } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+
 import publishMessage from "../messagequeue/send.js";
 
 const authCtrl = {
@@ -69,6 +71,7 @@ const authCtrl = {
       if (!user.rows[0].isverified) {
         return res.status(400).json({
           msg: "Please verify your email address before logging in",
+          isVerified: false,
         });
       }
 
@@ -76,6 +79,8 @@ const authCtrl = {
         "SELECT * FROM customers WHERE userId = $1",
         [user.rows[0].userid]
       );
+
+      const cart = await getCartData(customer.rows[0].customerid);
 
       const access_token = createAccessToken({ id: user.rows[0].userid });
       const refresh_token = createRefreshToken({ id: user.rows[0].userid });
@@ -87,7 +92,7 @@ const authCtrl = {
       });
 
       return res.json({
-        msg: "Login Success",
+        msg: "You have successfully logged in",
         access_token,
         data: {
           UserId: user.rows[0].userid,
@@ -97,6 +102,7 @@ const authCtrl = {
           CustomerId: customer.rows[0].customerid,
           Address: customer.rows[0].address,
           PhoneNumber: customer.rows[0].phonenumber,
+          cart,
         },
       });
 
@@ -110,7 +116,7 @@ const authCtrl = {
       res.clearCookie("refreshtoken", { path: "/api/refresh_token" });
 
       return res.json({
-        msg: "Logged out",
+        msg: "You have successfully logged out",
       });
     } catch (error) {
       return res.status(500).json({ msg: error.message });
@@ -158,6 +164,8 @@ const authCtrl = {
             values: [user.rows[0].userid],
           });
 
+          const cart = await getCartData(customer.rows[0].customerid);
+
           const access_token = createAccessToken({ id: user.rows[0].userid });
 
           return res.json({
@@ -170,6 +178,7 @@ const authCtrl = {
               CustomerId: customer.rows[0].customerid,
               Address: customer.rows[0].address,
               PhoneNumber: customer.rows[0].phonenumber,
+              cart,
             },
           });
         }
@@ -238,18 +247,21 @@ const authCtrl = {
     }
   },
   validateEmailVerification: async (req, res) => {
-    const { userId, verificationToken } = req.body;
+    const { email, verificationToken } = req.body;
     const current_time = new Date();
 
     try {
       const email_verification = await pool.query(
-        "SELECT * FROM email_verifications WHERE userId = $1 ORDER BY createdAt DESC LIMIT 1",
-        [userId]
+        `SELECT   *
+          FROM      email_verifications
+          WHERE     userId = (SELECT userId FROM users WHERE email = $1 LIMIT 1)
+          ORDER BY  createdAt DESC LIMIT 1`,
+        [email]
       );
 
       if (email_verification.rows.length === 0) {
         return res.status(400).json({
-          msg: "This user does not exist",
+          msg: "This email does not exist",
         });
       }
 
@@ -266,11 +278,11 @@ const authCtrl = {
       }
 
       await pool.query("UPDATE users SET isVerified = true WHERE userId = $1", [
-        userId,
+        email_verification.rows[0].userid,
       ]);
 
       await pool.query("DELETE FROM email_verifications WHERE userId = $1", [
-        userId,
+        email_verification.rows[0].userid,
       ]);
 
       const userData = await pool.query(
@@ -281,9 +293,9 @@ const authCtrl = {
         FROM    users U
                 INNER JOIN customers C
                   ON U.userId = C.userId
-        WHERE   U.userId = $1
+        WHERE   U.email = $1
         `,
-        [userId]
+        [email]
       );
 
       const access_token = createAccessToken({ id: userData.rows[0].userid });
@@ -296,7 +308,7 @@ const authCtrl = {
       });
 
       return res.json({
-        msg: "Email Verification Success",
+        msg: "You have successfully verified your email address. Welcome to our website.",
         access_token,
         data: {
           UserId: userData.rows[0].userid,
@@ -306,11 +318,47 @@ const authCtrl = {
           CustomerId: userData.rows[0].customerid,
           Address: userData.rows[0].address,
           PhoneNumber: userData.rows[0].phonenumber,
+          cart: [],
         },
       });
     } catch (error) {
       return res.status(500).json({
         msg: error.message,
+      });
+    }
+  },
+  resendEmailVerification: async (req, res) => {
+    const { email } = req.body;
+
+    try {
+      await pool.query(
+        "DELETE FROM email_verifications WHERE userId = (SELECT userId FROM users WHERE email = $1)",
+        [email]
+      );
+
+      const user = await pool.query("SELECT * FROM users WHERE email = $1", [
+        email,
+      ]);
+
+      if (user.rows.length === 0) {
+        return res.status(400).json({
+          msg: "This email does not exist",
+        });
+      }
+
+      const customer = await pool.query(
+        "SELECT * FROM customers WHERE userId = $1",
+        [user.rows[0].userid]
+      );
+
+      generateEmailVerification(user.rows[0], customer.rows[0]);
+
+      return res.status(200).json({
+        msg: "We've sent you a new email verification code. Please check your email again!",
+      });
+    } catch (err) {
+      return res.status(500).json({
+        msg: err.message,
       });
     }
   },
@@ -355,6 +403,20 @@ const generateEmailVerification = async (user, customer) => {
     publishMessage(message);
   } catch (error) {
     console.log(error.message);
+  }
+};
+
+// Get Cart Data from Order Service
+const getCartData = async (customerId) => {
+  let url = `http://${process.env.ORDER_SERVICE_SVC}/api/customer/user/getAllCartAuth/${customerId}`;
+
+  try {
+    const response = await axios.get(url);
+
+    return response.data;
+  } catch (err) {
+    console.log(err.message);
+    return [];
   }
 };
 

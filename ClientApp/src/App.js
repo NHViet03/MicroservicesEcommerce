@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { getDataAPI } from "./utils/fetchData";
+import { postDataAPI } from "./utils/fetchDataAccount";
 import Alert from "./components/Alert";
 
 // Import User Page
@@ -12,8 +12,7 @@ import UserCart from "./pages/user_pages/cart";
 import UserProceed from "./pages/user_pages/proceed";
 import UserContact from "./pages/user_pages/contact";
 import UserOrderPage from "./pages/user_pages/order";
-import UserOrderDetailPage from './pages/user_pages/order/[id]';
-
+import UserOrderDetailPage from "./pages/user_pages/order/[id]";
 
 // Page not found
 import PageNotFound from "./components/NotFound";
@@ -25,26 +24,23 @@ function App() {
   const [auth, setAuth] = useState(false);
 
   useEffect(() => {
-    const userId = localStorage.getItem("UserId");
+    const firstLogin = localStorage.getItem("firstLogin");
 
-    if (userId) {
-      getDataAPI(`customer/user/${userId}`)
+    if (firstLogin) {
+      postDataAPI(`api/refresh_token`)
         .then((res) => {
-          console.log(res.data);
-          if (res.err) {
-            localStorage.removeItem("userId");
-            setAuth(false);
-          }
-
-          setAuth(res.data.data);
+          setAuth({
+            ...res.data.data,
+            token: res.data.access_token,
+          });
         })
         .catch((err) => {
-          console.log(err)
-          // setAlert({
-          //   title: "Error",
-          //   data: err.response.data.error,
-          //   type: "error",
-          // });
+          console.log(err);
+          setAlert({
+            title: "Error",
+            data: err.response.data.msg,
+            type: "error",
+          });
         });
     }
   }, []);
@@ -67,7 +63,6 @@ function App() {
                 <Route path="order" element={<UserOrderPage />} />
                 <Route path="order/:id" element={<UserOrderDetailPage />} />
               </Route>
-
 
               <Route path="*" element={<PageNotFound />} />
             </Routes>

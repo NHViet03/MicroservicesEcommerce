@@ -5,10 +5,18 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// // Config CORS
+const corsOptions = {
+  origin: "http://localhost:3000",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(cookieParser());
 
-const port = 3000;
+
+const port = 5000;
 
 import authRouter from "./routers/authRouter.js";
 import customerRouter from "./routers/customerRouter.js";

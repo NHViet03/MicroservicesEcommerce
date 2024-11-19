@@ -9,5 +9,6 @@ router.post("/logout", authCtrl.logout);
 router.post("/refresh_token", authCtrl.generateAccessToken);
 router.post("/validate", authCtrl.validateAccessToken);
 router.post("/verify_email", authCtrl.validateEmailVerification);
+router.post("/resend_email", authCtrl.resendEmailVerification);
 
 export default router;
