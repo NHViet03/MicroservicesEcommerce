@@ -19,6 +19,7 @@ const ProductDetail = () => {
     getDataAPI(`product/user/getProduct/${id || 0}`)
       .then((res) => {
         setProduct(res.data);
+        console.log(res);
       })
       .catch((err) => {
         console.log(err);

@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
 
-const port = 3000;
+const port = 5000;
 
 import authRouter from "./routers/authRouter.js";
 import customerRouter from "./routers/customerRouter.js";
