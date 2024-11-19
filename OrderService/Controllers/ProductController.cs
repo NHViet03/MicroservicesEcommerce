@@ -22,11 +22,11 @@ namespace OrderService.Controllers
         //User API
         [HttpGet]
         [Route("user/countProduct")]
-        public async Task<IActionResult> CountProduct()
+        public async Task<IActionResult> CountProduct([FromQuery] string categoryId)
         {
             try
             {
-                var result = await _productRepository.CountProduct();
+                var result = await _productRepository.CountProductByCategory(categoryId);
 
 
                 return Ok(new { count = result });
@@ -39,11 +39,31 @@ namespace OrderService.Controllers
 
         [HttpGet]
         [Route("user/getAllProduct")]
-        public async Task<IActionResult> GetAllProduct()
+        public async Task<IActionResult> GetAllProduct([FromQuery] string categoryId, [FromQuery] int pageSize = 1, [FromQuery] int sortType = 0)
         {
             try
             {
-                var result = await _productRepository.GetAllProduct();
+                var result = await _productRepository.GetAllProductByCategory(categoryId);
+
+                // Page Size Take 5 Skip 5
+                if (pageSize > 1)
+                {
+                    result = result.Skip((pageSize - 1) * 5).Take(5).ToList();
+                }
+
+                // Sort Type = 1: Price Ascending, 2: Price Descending , 3 : Sale Price Ascending
+                if (sortType == 1)
+                {
+                    result = result.OrderBy(p => p.Price).ToList();
+                }
+                else if (sortType == 2)
+                {
+                    result = result.OrderByDescending(p => p.Price).ToList();
+                }
+                else if (sortType == 3)
+                {
+                    result = result.OrderBy(p => p.SalePrice).ToList();
+                }
 
                 if (result == null)
                 {

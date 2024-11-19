@@ -44,6 +44,12 @@ namespace OrderService.Repository
             await _productCollection.ReplaceOneAsync(p => p.Id == product.Id, product);
         }
 
+        // Get All Product By Category
+        public async Task<List<Product>> GetAllProductByCategory(string categoryId)
+        {
+            return await _productCollection.Find(p => p.CategoryId == categoryId).ToListAsync();
+        }
+
 
     }
 }

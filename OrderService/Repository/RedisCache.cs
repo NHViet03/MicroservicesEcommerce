@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using OrderService.Models;
 using StackExchange.Redis;
 
 namespace OrderService.Repository
@@ -49,58 +48,7 @@ namespace OrderService.Repository
             }
         }
 
-        public async Task<string> GetCacheKeyFromCartId(string CartId)
-        {
-            if (string.IsNullOrEmpty(CartId))
-            {
-                // Nếu CartId không hợp lệ, trả về null
-                return null;
-            }
 
-            // Sử dụng mẫu khóa cho các khóa có dạng "string-string"
-            string cacheKeyPattern = "*-*"; // Mẫu tìm kiếm các khóa có dấu gạch nối
-
-            try
-            {
-                // Lấy endpoint của Redis một cách cẩn thận
-                var endpoint = _db.Multiplexer.GetEndPoints().FirstOrDefault();
-                if (endpoint == null)
-                {
-                    // Nếu không có endpoint, trả về null hoặc log lỗi
-                    return null;
-                }
-
-                var server = _db.Multiplexer.GetServer(endpoint);
-
-                // Lấy tất cả các khóa theo mẫu "*-*" (khóa có dạng string-string)
-                var keys = server.Keys(pattern: cacheKeyPattern);
-
-                // Lặp qua các khóa và tìm giỏ hàng tương ứng
-                foreach (var key in keys)
-                {
-                    var value = await _db.StringGetAsync(key);
-                    if (!string.IsNullOrEmpty(value))
-                    {
-                        // Deserialize value thành Cart object
-                        var cart = JsonConvert.DeserializeObject<Cart>(value);
-
-                        // Kiểm tra nếu cart.Id trùng với CartId
-                        if (cart.Id == CartId)
-                        {
-                            return key.ToString(); // Trả về khóa tìm được
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // Log lỗi hoặc xử lý lỗi nếu có
-                // Ví dụ: _logger.LogError($"Redis error: {ex.Message}");
-            }
-
-            // Nếu không tìm thấy giỏ hàng, trả về null
-            return null;
-        }
 
         public async Task<List<string>> GetKeysByPattern(string pattern)
         {

@@ -29,6 +29,8 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader();
         });
 });
+
+
 // Add services to the container.
 
 //builder.Services.AddControllers();
@@ -49,6 +51,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Alow CORS
+app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

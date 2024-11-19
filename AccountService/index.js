@@ -15,7 +15,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(cookieParser());
 
-
 const port = 5000;
 
 import authRouter from "./routers/authRouter.js";
