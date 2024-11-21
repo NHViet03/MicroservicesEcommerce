@@ -29,7 +29,7 @@ namespace OrderService.Controllers
         }
         private async Task<UserFromTokenDTO?> ValidateToken()
         {
-            var token = Request.Headers["Authorization"].ToString();
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             if (string.IsNullOrEmpty(token))
             {
                 throw new UnauthorizedAccessException("Authorization header is missing");
@@ -37,7 +37,7 @@ namespace OrderService.Controllers
 
             using HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("Authorization", token);
-            string url = "http://localhost:3000/api/validate";
+            string url = "http://localhost:5000/api/validate";
             HttpResponseMessage response = await client.PostAsync(url, null);
 
             if (response.StatusCode != HttpStatusCode.OK)

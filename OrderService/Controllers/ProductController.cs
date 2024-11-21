@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OrderService.Models;
 using OrderService.Repository;
 
 namespace OrderService.Controllers
@@ -39,11 +40,20 @@ namespace OrderService.Controllers
 
         [HttpGet]
         [Route("user/getAllProduct")]
-        public async Task<IActionResult> GetAllProduct([FromQuery] string categoryId, [FromQuery] int pageSize = 1, [FromQuery] int sortType = 0)
+        public async Task<IActionResult> GetAllProduct([FromQuery] string categoryId = "", [FromQuery] int pageSize = 1, [FromQuery] int sortType = 0)
         {
             try
             {
-                var result = await _productRepository.GetAllProductByCategory(categoryId);
+                var result = new List<Product>();
+                if (categoryId != "")
+                {
+                    result = await _productRepository.GetAllProductByCategory(categoryId);
+
+                }
+                else
+                {
+                    result = await _productRepository.GetAllProduct();
+                }
 
                 // Page Size Take 5 Skip 5
                 if (pageSize > 1)

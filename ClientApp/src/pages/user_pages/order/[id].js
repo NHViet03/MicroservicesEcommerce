@@ -14,7 +14,7 @@ const OrderDetail = () => {
   useEffect(() => {
     if (!auth || !auth.CustomerId || !id) return;
 
-    getDataAPI(`order/user/getOrder/${id}`)
+    getDataAPI(`order/user/getOrder/${id}`, auth.token)
       .then((res) => {
         setOrder(res.data.order);
       })
