@@ -33,7 +33,7 @@ namespace OrderService.Controllers
 
             using HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("Authorization", token);
-            string url = "http://localhost:5000/api/validate";
+            string url = "http://account:5000/api/validate";
             HttpResponseMessage response = await client.PostAsync(url, null);
 
             if (response.StatusCode != HttpStatusCode.OK)
@@ -170,7 +170,7 @@ namespace OrderService.Controllers
             var getAllCart = new List<GetAllCartAuthDTO>();
             try
             {
-                var customerDataToken = await ValidateToken();
+                
                 // Get all keys from Redis like "customerId-*"
                 var cacheKeyPattern = $"{customerId}-*";
                 var cacheKeys = await redisCache.GetKeysByPattern(cacheKeyPattern);

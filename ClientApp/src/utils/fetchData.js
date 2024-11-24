@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "https://localhost:7003";
+const BASE_URL = "http://172.188.162.219/order";
 
 export const getDataAPI = async (url, token) => {
   const res = await axios.get(`${BASE_URL}/api/${url}`, {

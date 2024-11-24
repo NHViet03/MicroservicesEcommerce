@@ -37,7 +37,7 @@ namespace OrderService.Controllers
 
             using HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("Authorization", token);
-            string url = "http://localhost:5000/api/validate";
+            string url = "http://account:5000/api/validate";
             HttpResponseMessage response = await client.PostAsync(url, null);
 
             if (response.StatusCode != HttpStatusCode.OK)
@@ -220,7 +220,7 @@ namespace OrderService.Controllers
                 // Put API to localhost:3000/api/updateDeliveryInfo with body  UpdateDeliveryInfoDTO
                 using HttpClient client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Authorization", Request.Headers["Authorization"].ToString());
-                string url = "http://localhost:3000/api/updateDeliveryInfo";
+                string url = "http://account:5000/api/updateDeliveryInfo";
                 var json = JsonConvert.SerializeObject(customer);
                 var data = new StringContent(json, Encoding.UTF8, "application/json");
                 HttpResponseMessage response = await client.PutAsync(url, data);

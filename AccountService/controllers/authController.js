@@ -80,7 +80,7 @@ const authCtrl = {
         [user.rows[0].userid]
       );
 
-      const cart = await getCartData(customer.rows[0].customerid);
+      // const cart = await getCartData(customer.rows[0].customerid);
 
       const access_token = createAccessToken({ id: user.rows[0].userid });
       const refresh_token = createRefreshToken({ id: user.rows[0].userid });
@@ -102,11 +102,75 @@ const authCtrl = {
           CustomerId: customer.rows[0].customerid,
           Address: customer.rows[0].address,
           PhoneNumber: customer.rows[0].phonenumber,
-          cart,
+          cart: [],
         },
       });
 
       // const email_verification_token = uuidv4();
+    } catch (error) {
+      return res.status(500).json({ msg: error.message });
+    }
+  },
+  login_v2: async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+      const user = await pool.query("SELECT * FROM users WHERE email = $1", [
+        email,
+      ]);
+
+      if (user.rows.length === 0) {
+        return res.status(400).json({
+          msg: "This user does not exist",
+        });
+      }
+
+      const valid_password = await bcrypt.compare(
+        password,
+        user.rows[0].passwordhash
+      );
+
+      if (!valid_password) {
+        return res.status(400).json({
+          msg: "Password is incorrect",
+        });
+      }
+
+      if (!user.rows[0].isverified) {
+        return res.status(400).json({
+          msg: "Please verify your email address before logging in",
+          isVerified: false,
+        });
+      }
+
+      const customer = await pool.query(
+        "SELECT * FROM customers WHERE userId = $1",
+        [user.rows[0].userid]
+      );
+
+      const access_token = createAccessToken({ id: user.rows[0].userid });
+      const refresh_token = createRefreshToken({ id: user.rows[0].userid });
+
+      res.cookie("refreshtoken", refresh_token, {
+        httpOnly: true,
+        path: "/api/refresh_token",
+        maxAge: 30 * 7 * 24 * 60 * 60 * 1000, // 30days
+      });
+
+      return res.json({
+        msg: "You have successfully logged in",
+        access_token,
+        data: {
+          UserId: user.rows[0].userid,
+          Email: user.rows[0].email,
+          FirstName: customer.rows[0].firstname,
+          LastName: customer.rows[0].lastname,
+          CustomerId: customer.rows[0].customerid,
+          Address: customer.rows[0].address,
+          PhoneNumber: customer.rows[0].phonenumber,
+          cart: [],
+        },
+      });
     } catch (error) {
       return res.status(500).json({ msg: error.message });
     }
@@ -164,7 +228,7 @@ const authCtrl = {
             values: [user.rows[0].userid],
           });
 
-          const cart = await getCartData(customer.rows[0].customerid);
+          // const cart = await getCartData(customer.rows[0].customerid);
 
           const access_token = createAccessToken({ id: user.rows[0].userid });
 
@@ -178,7 +242,7 @@ const authCtrl = {
               CustomerId: customer.rows[0].customerid,
               Address: customer.rows[0].address,
               PhoneNumber: customer.rows[0].phonenumber,
-              cart,
+              cart:[],
             },
           });
         }
@@ -406,18 +470,18 @@ const generateEmailVerification = async (user, customer) => {
   }
 };
 
-// Get Cart Data from Order Service
-const getCartData = async (customerId) => {
-  let url = `http://${process.env.ORDER_SERVICE_SVC}/api/customer/user/getAllCartAuth/${customerId}`;
+// // Get Cart Data from Order Service
+// const getCartData = async (customerId) => {
+//   let url = `http://${process.env.ORDER_SERVICE_SVC}/api/customer/user/getAllCartAuth/${customerId}`;
 
-  try {
-    const response = await axios.get(url);
+//   try {
+//     const response = await axios.get(url);
 
-    return response.data;
-  } catch (err) {
-    console.log(err.message);
-    return [];
-  }
-};
+//     return response.data;
+//   } catch (err) {
+//     console.log(err.message);
+//     return [];
+//   }
+// };
 
 export default authCtrl;
