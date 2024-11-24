@@ -1,6 +1,7 @@
 import React, { useState, useEffect, createContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { postDataAPI } from "./utils/fetchDataAccount";
+import { getDataAPI } from "./utils/fetchData";
 import Alert from "./components/Alert";
 
 // Import User Page
@@ -44,6 +45,21 @@ function App() {
         });
     }
   }, []);
+
+  useEffect(() => {
+    if (!auth || !auth.CustomerId) return;
+
+    getDataAPI(`customer/user/getAllCartAuth/${auth.CustomerId}`)
+      .then((res) => {
+        setAuth({
+          ...auth,
+          cart: res.data,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [auth]);
 
   return (
     <AppContext.Provider value={{ alert, setAlert, auth, setAuth }}>
