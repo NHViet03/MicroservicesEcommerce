@@ -27,7 +27,7 @@ function App() {
   useEffect(() => {
     const firstLogin = localStorage.getItem("firstLogin");
 
-    if (firstLogin) {
+    if (firstLogin && auth === false) {
       postDataAPI(`api/refresh_token`)
         .then((res) => {
           setAuth({

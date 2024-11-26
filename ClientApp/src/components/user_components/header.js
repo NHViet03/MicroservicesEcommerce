@@ -49,6 +49,7 @@ function Header({ showAuthModal, setShowAuthModal }) {
     try {
       const response = await postDataAPI("api/logout");
 
+      localStorage.removeItem("firstLogin");
       setAuth(false);
       navigate("/");
       setAlert({
@@ -56,8 +57,6 @@ function Header({ showAuthModal, setShowAuthModal }) {
         data: response.data.msg,
         type: "success",
       });
-
-      localStorage.removeItem("firstLogin");
     } catch (err) {
       console.log(err);
       setAlert({
