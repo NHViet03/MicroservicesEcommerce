@@ -70,3 +70,4 @@ jobs:
         APP_NAME=$(echo ${{ matrix.service }} | sed -e 's/Service$//' -e 's/\([A-Z]\)/\L\1/g')
         kubectl apply -f ./AKS/${{ matrix.service }}/App.yaml --namespace ${{ env.NAMESPACE }}
         kubectl set image deployment/$APP_NAME $IMAGE_NAME=${{ env.REGISTRY_NAME }}/$IMAGE_NAME:${{ github.sha }} -n ${{ env.NAMESPACE }}
+        kubectl apply -f ./AKS/ingress.yaml
