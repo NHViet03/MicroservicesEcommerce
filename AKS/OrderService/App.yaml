@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+      - name: orderservice
+        image: dreamers.azurecr.io/orderservice:latest
+        envFrom:
+          - configMapRef:
+              name: order-config
+          - secretRef:
+              name: order-secret
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: order
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-config
+data:
+  Logging: |
+    {
+      "LogLevel": {
+        "Default": "Information",
+        "Microsoft.AspNetCore": "Warning"
+      }
+    }
+  AllowedHosts: "*"
+  MongoDB.DatabaseName: "orderService"
+  MongoDB.CategoryCollection: "categories"
+  MongoDB.ProductCollection: "products"
+  MongoDB.OrderCollection: "orders"
+  MongoDB.OrderDetailCollection: "orderDetails"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: order-secret
+type: Opaque
+stringData:
+  MongoDB.ConnectionString: mongodb+srv://orderadmin:dreamer%40123456@ordercluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000
+  Redis.ConnectionString: cart.redis.cache.windows.net:6380,password=gvnp5uXrBr4DF3eEx5wB9AIPxjqTd98H5AzCaHXP0ek=,ssl=True,abortConnect=False
+  AzureServiceBus.ConnectionString: Endpoint=sb://dreamer.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=DudsZpjZRz0MSsEL9435YFXtpx+zyfx9n+ASbFD6PgY=

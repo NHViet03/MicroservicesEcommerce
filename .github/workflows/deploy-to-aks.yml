@@ -1,0 +1,72 @@
+name: Build and Deploy to AKS
+
+on: 
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY_NAME: dreamers.azurecr.io
+  CLUSTER_NAME: dreamersAKSCluster
+  CLUSTER_RESOURCE_GROUP: Microservices
+  NAMESPACE: ingress-basic
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    # Dynamically detect which service has changes
+    strategy:
+      matrix:
+        service: [AccountService, OrderService] # List all service folder names here
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Skip the job if no files in the service directory have changed
+    - name: Check if Service Changed
+      id: service_changed
+      run: |
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "${{ matrix.service }}/" || echo "no-changes" > skip
+        if [[ -e skip ]]; then exit 0; fi
+
+    - name: Stop Workflow if Service Did Not Change
+      if: success() && steps.service_changed.outputs.skip == 'no-changes'
+      run: echo "No changes detected in the ${{ matrix.service }} service. Skipping..."
+
+    # Login to Azure Container Registry
+    - name: Login to ACR
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.REGISTRY_NAME }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    # Build and Push Docker Image for the Service
+    - name: Build and Push Docker Image
+      run: |
+        IMAGE_NAME=$(echo ${{ matrix.service }} | tr '[:upper:]' '[:lower:]')
+        docker build ./${{ matrix.service }} -t ${{ env.REGISTRY_NAME }}/$IMAGE_NAME:${{ github.sha }}
+        docker push ${{ env.REGISTRY_NAME }}/$IMAGE_NAME:${{ github.sha }}
+
+    # Set AKS Context
+    - name: Set AKS Context
+      uses: azure/aks-set-context@v1
+      with:
+        creds: '${{ secrets.AZURE_CREDENTIALS }}'
+        cluster-name: ${{ env.CLUSTER_NAME }}
+        resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
+
+    # Create namespace if it doesn't exist
+    - name: Create Namespace
+      run: |
+        kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+    # Deploy Service to AKS
+    - name: Deploy to AKS
+      run: |
+        IMAGE_NAME=$(echo ${{ matrix.service }} | tr '[:upper:]' '[:lower:]')
+        APP_NAME=$(echo ${{ matrix.service }} | sed -e 's/Service$//' -e 's/\([A-Z]\)/\L\1/g')
+        kubectl apply -f ./AKS/${{ matrix.service }}/App.yaml --namespace {{ env.NAMESPACE }}
+        kubectl set image deployment/$APP_NAME $IMAGE_NAME=${{ env.REGISTRY_NAME }}/$IMAGE_NAME:${{ github.sha }} -n ${{ env.NAMESPACE }}
