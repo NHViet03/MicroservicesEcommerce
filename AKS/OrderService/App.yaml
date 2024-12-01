@@ -1,6 +1,72 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: account
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: account
+  template:
+    metadata:
+      labels:
+        app: account
+    spec:
+      containers:
+      - name: accountservice
+        image: dreamers.azurecr.io/accountservice:latest
+        envFrom:
+          - configMapRef:
+              name: account-config
+          - secretRef:
+              name: account-secret
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: account
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    app: account
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: account-config
+data:
+  PGHOST: accountsdb.postgres.database.azure.com
+  PGUSER: admin123
+  PGPORT: "5432"
+  PGDATABASE: postgres
+  AZURE_SERVICE_BUS_QUEUE_NAME: accountqueue
+  CLIENT_APP_URL: http://localhost:3000
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: account-secret
+stringData:
+  PGPASSWORD: Dreamer123
+  ACCESS_TOKEN_SECRET: access_secret
+  REFRESH_TOKEN_SECRET: refresh_secret
+  AZURE_SERVICE_BUS_CONNECTION_STRING: Endpoint=sb://dreamer.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=DudsZpjZRz0MSsEL9435YFXtpx+zyfx9n+ASbFD6PgY=
+type: Opaque
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: order
 spec:
   replicas: 1
