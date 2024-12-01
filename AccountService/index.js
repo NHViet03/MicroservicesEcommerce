@@ -8,7 +8,7 @@ app.use(express.json());
 
 // // Config CORS
 const corsOptions = {
-  origin: process.env.CLIENT_APP_URL,
+  origin: [process.env.CLIENT_APP_URL, "https://brave-grass-0fb8e9100.5.azurestaticapps.net/"],
   credentials: true,
 };
 
