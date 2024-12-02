@@ -20,11 +20,10 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
 // Alow CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
+    options.AddPolicy("AllowSpecificOrigin",
         builder =>
         {
-            builder
-                .AllowAnyOrigin()
+            builder.WithOrigins("https://brave-grass-0fb8e9100.5.azurestaticapps.net")
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
@@ -52,7 +51,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Alow CORS
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowSpecificOrigin");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
