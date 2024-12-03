@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using OrderService.Repository;
 
 namespace OrderService.Controllers
@@ -17,6 +18,7 @@ namespace OrderService.Controllers
         }
 
         //User API
+        [DisableCors]
         [HttpGet]
         [Route("user/getAllCategory")]
         public async Task<IActionResult> GetAllCategory()

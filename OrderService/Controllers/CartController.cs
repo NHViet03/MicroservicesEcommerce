@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using OrderService.DTO;
 using OrderService.Models;
@@ -45,7 +46,7 @@ namespace OrderService.Controllers
             return JsonConvert.DeserializeObject<UserFromTokenDTO>(responseData);
         }
 
-
+        [DisableCors]
         [HttpPost]
         [Route("user/addToCart")]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartDTO addToCartDTO)
@@ -80,7 +81,7 @@ namespace OrderService.Controllers
 
         }
 
-
+        [DisableCors]
         [HttpPost]
         [Route("user/updateAllCart")]
 
@@ -121,6 +122,7 @@ namespace OrderService.Controllers
             }
         }
 
+        [DisableCors]
         [HttpGet]
         [Route("user/getAllCart/{customerId}")]
         public async Task<IActionResult> GetAllCart(string customerId)
@@ -163,6 +165,7 @@ namespace OrderService.Controllers
             }
         }
 
+        [DisableCors]
         [HttpGet]
         [Route("user/getAllCartAuth/{customerId}")]
         public async Task<IActionResult> GetAllCartAuth(string customerId)

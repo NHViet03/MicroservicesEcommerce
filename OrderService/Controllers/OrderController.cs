@@ -1,4 +1,5 @@
 ﻿using Azure.Messaging.ServiceBus;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using OrderService.DTO;
@@ -50,6 +51,7 @@ namespace OrderService.Controllers
         }
 
         //User API
+        [DisableCors]
         [HttpGet]
         [Route("user/getAllOrder/{customerId}")]
         public async Task<IActionResult> GetAllOrder(string customerId)
@@ -91,6 +93,7 @@ namespace OrderService.Controllers
             }
         }
 
+        [DisableCors]
         [HttpGet]
         [Route("user/getOrder/{orderId}")]
         public async Task<IActionResult> GetOrder(string orderId)
@@ -147,6 +150,7 @@ namespace OrderService.Controllers
 
         }
 
+        [DisableCors]
         [HttpPost]
         [Route("user/createOrder")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDTO orderDTO)
