@@ -17,17 +17,19 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
     ConnectionMultiplexer.Connect(builder.Configuration.GetSection("Redis:ConnectionString").Value!.ToString()
 ));
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 // Alow CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        builder =>
-        {
-            builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
+    options.AddPolicy(MyAllowSpecificOrigins,
+                          policy =>
+                          {
+                              policy.WithOrigins("https://brave-grass-0fb8e9100.5.azurestaticapps.net",
+                                                  "http://www.contoso.com")
+                                                  .AllowAnyHeader()
+                                                  .AllowAnyMethod();
+                          });
 });
 
 
@@ -52,9 +54,9 @@ if (app.Environment.IsDevelopment())
 }
 
 // Alow CORS
-app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
 
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
 
 app.MapControllers();
