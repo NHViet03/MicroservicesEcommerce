@@ -1,4 +1,4 @@
-﻿using OrderService.Models;
+﻿﻿using OrderService.Models;
 using OrderService.Repository;
 using StackExchange.Redis;
 
@@ -20,10 +20,11 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
 // Alow CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
+    options.AddPolicy("AllowAllOrigins",
         builder =>
         {
-            builder.WithOrigins("https://brave-grass-0fb8e9100.5.azurestaticapps.net")
+            builder
+                .AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
@@ -51,7 +52,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Alow CORS
-app.UseCors("AllowSpecificOrigin");
+app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

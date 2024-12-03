@@ -18,7 +18,7 @@ jobs:
     # Dynamically detect which service has changes
     strategy:
       matrix:
-        service: [OrderService, AccountService] # List all service folder names here
+        service: [AccountService, OrderService] # List all service folder names here
 
     steps:
     - name: Checkout Code
@@ -69,3 +69,4 @@ jobs:
         IMAGE_NAME=$(echo ${{ matrix.service }} | tr '[:upper:]' '[:lower:]')
         APP_NAME=$(echo ${{ matrix.service }} | sed -e 's/Service$//' -e 's/\([A-Z]\)/\L\1/g')
         kubectl apply -f ./AKS/App.yaml --namespace ${{ env.NAMESPACE }}
+        kubectl apply -f ./AKS/ingress.yaml
