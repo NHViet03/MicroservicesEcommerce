@@ -12,13 +12,12 @@ env:
   NAMESPACE: ingress-basic
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
-    # Dynamically detect which service has changes
     strategy:
       matrix:
-        service: [AccountService, OrderService] # List all service folder names here
+        service: [AccountService, OrderService] # Add all services here
 
     steps:
     - name: Checkout Code
@@ -46,9 +45,17 @@ jobs:
     # Build and Push Docker Image for the Service
     - name: Build and Push Docker Image
       run: |
-        IMAGE_NAME=$(echo ${{ matrix.service }} | tr '[:upper:]' '[:lower:]')
+        IMAGE_NAME=$(echo ${{ matrix.service }} | sed -e 's/Service$//' -e 's/\([A-Z]\)/\L\1/g')
         docker build ./${{ matrix.service }} -t ${{ env.REGISTRY_NAME }}/$IMAGE_NAME:latest
         docker push ${{ env.REGISTRY_NAME }}/$IMAGE_NAME:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push # Wait for all build jobs to complete
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
     # Set AKS Context
     - name: Set AKS Context
@@ -63,10 +70,8 @@ jobs:
       run: |
         kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
 
-    # Deploy Service to AKS
+    # Deploy Services to AKS
     - name: Deploy to AKS
       run: |
-        IMAGE_NAME=$(echo ${{ matrix.service }} | tr '[:upper:]' '[:lower:]')
-        APP_NAME=$(echo ${{ matrix.service }} | sed -e 's/Service$//' -e 's/\([A-Z]\)/\L\1/g')
         kubectl apply -f ./AKS/App.yaml --namespace ${{ env.NAMESPACE }}
         kubectl apply -f ./AKS/ingress.yaml
