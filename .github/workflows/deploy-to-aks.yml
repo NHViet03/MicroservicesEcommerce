@@ -45,7 +45,7 @@ jobs:
     # Build and Push Docker Image for the Service
     - name: Build and Push Docker Image
       run: |
-        IMAGE_NAME=$(echo ${{ matrix.service }} | sed -e 's/Service$//' -e 's/\([A-Z]\)/\L\1/g')
+        IMAGE_NAME=$(echo ${{ matrix.service }} | tr '[:upper:]' '[:lower:]')
         docker build ./${{ matrix.service }} -t ${{ env.REGISTRY_NAME }}/$IMAGE_NAME:latest
         docker push ${{ env.REGISTRY_NAME }}/$IMAGE_NAME:latest
 
