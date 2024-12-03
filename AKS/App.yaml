@@ -51,7 +51,7 @@ data:
   PGPORT: "5432"
   PGDATABASE: postgres
   AZURE_SERVICE_BUS_QUEUE_NAME: accountqueue
-  CLIENT_APP_URL: http://localhost:3000
+  CLIENT_APP_URL: https://brave-grass-0fb8e9100.5.azurestaticapps.net
 ---
 apiVersion: v1
 kind: Secret
