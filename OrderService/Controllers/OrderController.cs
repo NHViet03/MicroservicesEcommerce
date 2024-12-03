@@ -10,6 +10,7 @@ using System.Text;
 
 namespace OrderService.Controllers
 {
+    [EnableCors("MyPolicy")]
     [Route("api/order")]
     [ApiController]
     public class OrderController : ControllerBase

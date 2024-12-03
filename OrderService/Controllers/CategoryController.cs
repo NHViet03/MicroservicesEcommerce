@@ -4,6 +4,7 @@ using OrderService.Repository;
 
 namespace OrderService.Controllers
 {
+    [EnableCors("MyPolicy")]
     [Route("api/category")]
     [ApiController]
     public class CategoryController : ControllerBase

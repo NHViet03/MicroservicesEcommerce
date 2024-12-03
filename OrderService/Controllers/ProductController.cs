@@ -5,6 +5,7 @@ using OrderService.Repository;
 
 namespace OrderService.Controllers
 {
+    [EnableCors("MyPolicy")]
     [Route("api/product")]
     [ApiController]
     public class ProductController : ControllerBase

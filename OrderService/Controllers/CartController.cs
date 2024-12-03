@@ -8,6 +8,7 @@ using System.Net;
 
 namespace OrderService.Controllers
 {
+    [EnableCors("MyPolicy")]
     [Route("api/customer")]
     [ApiController]
     public class CartController : ControllerBase
