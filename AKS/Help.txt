@@ -26,4 +26,4 @@ kubectl apply -f ./ingress.yaml
 kubectl --namespace ingress-basic get services -o wide -w nginx-ingress-ingress-nginx-controller
 
 ## Delete all
-az group delete --name myResourceGroup --yes --no-wait
+az group delete --name myResourceGroup --yes --no-wait 
