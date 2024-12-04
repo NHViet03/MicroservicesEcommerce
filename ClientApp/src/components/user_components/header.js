@@ -48,10 +48,10 @@ function Header({ showAuthModal, setShowAuthModal }) {
   const handleLogout = async () => {
     try {
       localStorage.removeItem("firstLogin");
-      setAuth(false);
+      setAuth({});
 
       const response = await postDataAPI("api/logout");
-      
+
       navigate("/");
       setAlert({
         title: "Logout Success",
