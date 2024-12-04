@@ -8,7 +8,6 @@ using System.Net;
 
 namespace OrderService.Controllers
 {
-    [EnableCors("MyPolicy")]
     [Route("api/customer")]
     [ApiController]
     public class CartController : ControllerBase
@@ -47,7 +46,6 @@ namespace OrderService.Controllers
             return JsonConvert.DeserializeObject<UserFromTokenDTO>(responseData);
         }
 
-        [DisableCors]
         [HttpPost]
         [Route("user/addToCart")]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartDTO addToCartDTO)
@@ -82,7 +80,6 @@ namespace OrderService.Controllers
 
         }
 
-        [DisableCors]
         [HttpPost]
         [Route("user/updateAllCart")]
 
@@ -123,7 +120,6 @@ namespace OrderService.Controllers
             }
         }
 
-        [DisableCors]
         [HttpGet]
         [Route("user/getAllCart/{customerId}")]
         public async Task<IActionResult> GetAllCart(string customerId)
@@ -166,7 +162,6 @@ namespace OrderService.Controllers
             }
         }
 
-        [DisableCors]
         [HttpGet]
         [Route("user/getAllCartAuth/{customerId}")]
         public async Task<IActionResult> GetAllCartAuth(string customerId)

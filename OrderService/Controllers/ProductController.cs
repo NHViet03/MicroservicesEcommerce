@@ -5,7 +5,6 @@ using OrderService.Repository;
 
 namespace OrderService.Controllers
 {
-    [EnableCors("MyPolicy")]
     [Route("api/product")]
     [ApiController]
     public class ProductController : ControllerBase
@@ -23,7 +22,6 @@ namespace OrderService.Controllers
 
 
         //User API
-        [DisableCors]
         [HttpGet]
         [Route("user/countProduct")]
         public async Task<IActionResult> CountProduct([FromQuery] string categoryId)
@@ -41,7 +39,6 @@ namespace OrderService.Controllers
             }
         }
 
-        [DisableCors]
         [HttpGet]
         [Route("user/getAllProduct")]
         public async Task<IActionResult> GetAllProduct([FromQuery] string categoryId = "", [FromQuery] int pageSize = 1, [FromQuery] int sortType = 0)
@@ -108,7 +105,6 @@ namespace OrderService.Controllers
             }
         }
 
-        [DisableCors]
         [HttpGet]
         [Route("user/getProduct/{productId}")]
         public async Task<IActionResult> GetProduct(string productId)

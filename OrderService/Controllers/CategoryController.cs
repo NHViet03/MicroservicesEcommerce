@@ -4,7 +4,6 @@ using OrderService.Repository;
 
 namespace OrderService.Controllers
 {
-    [EnableCors("MyPolicy")]
     [Route("api/category")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -19,7 +18,6 @@ namespace OrderService.Controllers
         }
 
         //User API
-        [DisableCors]
         [HttpGet]
         [Route("user/getAllCategory")]
         public async Task<IActionResult> GetAllCategory()
