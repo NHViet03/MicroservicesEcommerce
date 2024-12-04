@@ -5,7 +5,7 @@ import { AppContext } from "../../App";
 import Banner from "../../images/banner_cart.jpg";
 
 const Cart = () => {
-  const { setAlert, auth } = useContext(AppContext);
+  const { auth } = useContext(AppContext);
   const [carts, setCarts] = useState([]);
   const [total, setTotal] = useState(0);
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const Cart = () => {
       .catch((err) => {
         console.log(err);
       });
-  }, [auth.CustomerId, auth.cart, navigate, setAlert]);
+  }, [auth.CustomerId, auth.cart]);
 
   const handleChangeQty = (e, cart) => {
     const newCarts = carts.map((c) => {

@@ -43,6 +43,8 @@ function App() {
             type: "error",
           });
         });
+    } else {
+      setAuth(false);
     }
   }, []);
 
