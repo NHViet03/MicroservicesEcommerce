@@ -61,7 +61,7 @@ stringData:
   PGPASSWORD: Dreamer123
   ACCESS_TOKEN_SECRET: access_secret
   REFRESH_TOKEN_SECRET: refresh_secret
-  AZURE_SERVICE_BUS_CONNECTION_STRING: Endpoint=sb://dreamer.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=DudsZpjZRz0MSsEL9435YFXtpx+zyfx9n+ASbFD6PgY=
+  AZURE_SERVICE_BUS_CONNECTION_STRING: <<your_connection>>
 type: Opaque
 ---
 apiVersion: apps/v1
@@ -132,6 +132,6 @@ metadata:
   name: order-secret
 type: Opaque
 stringData:
-  MongoDB.ConnectionString: mongodb+srv://orderadmin:dreamer%40123456@ordercluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000
-  Redis.ConnectionString: cart.redis.cache.windows.net:6380,password=gvnp5uXrBr4DF3eEx5wB9AIPxjqTd98H5AzCaHXP0ek=,ssl=True,abortConnect=False
-  AzureServiceBus.ConnectionString: Endpoint=sb://dreamer.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=DudsZpjZRz0MSsEL9435YFXtpx+zyfx9n+ASbFD6PgY=
+  MongoDB.ConnectionString: <<your_connection>>
+  Redis.ConnectionString: <<your_connection>>
+  AzureServiceBus.ConnectionString: <<your_connection>>
